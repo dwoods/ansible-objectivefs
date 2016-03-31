@@ -116,7 +116,7 @@ galaxy_info:
     - trusty
   #  - utopic
   #  - vivid
-   - wily
+    - wily
   #- name: SLES
   #  versions:
   #  - all

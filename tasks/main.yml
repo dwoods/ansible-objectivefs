@@ -1,2 +1,48 @@
 ---
+- debug: var=objectivefs_deb
+- debug: var=objectivefs_packagename
 
+- name: Download objectivefs
+  get_url: url="{{ objectivefs_deb }}"
+    dest="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename }}"
+
+- name: Install objectivefs
+  apt: deb="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename }}"
+    state=present
+  sudo: true
+
+- name: Make sure objectivefs config dir exists
+  file:
+    path: /etc/objectivefs.env
+    state: directory
+
+- copy: content="{{ item.content }}" dest=/etc/objectivefs.env/{{ item.filename }}
+  with_items:
+    - { content: '{{ aws_access_key_id }}', filename: 'AWS_ACCESS_KEY_ID' }
+    - { content: '{{ aws_secret_access_key }}', filename: 'AWS_SECRET_ACCESS_KEY' }
+    - { content: '{{ objectivefs_licence }}', filename: 'OBJECTIVEFS_LICENSE' }
+    - { content: '{{ objectivefs_passphrase }}', filename: 'OBJECTIVEFS_PASSPHRASE' }
+
+- name: Make sure mount point exists
+  file:
+    path: /ofs
+    state: directory
+
+- name: Mount drive
+  command: "mount.objectivefs {{ objectivefs_filesystem }} /ofs"
+  args:
+    creates: /ofs/README
+  sudo: true
+
+- name: Make sure objectivefs_symlinks paths exists
+  file:
+    path: "/ofs/{{ item.ofs_path }}"
+    state: directory
+  with_items: objectivefs_symlinks
+
+- name: Symlink the content into the application where it's needed
+  file:
+    src="/ofs/{{ item.ofs_path }}"
+    dest="{{ item.server_path }}"
+    state=link
+  with_items: objectivefs_symlinks
