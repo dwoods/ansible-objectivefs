@@ -1,6 +1,4 @@
 ---
-- debug: var=objectivefs_deb
-- debug: var=objectivefs_packagename
 
 - name: Download objectivefs
   get_url: url="{{ objectivefs_deb }}"
@@ -34,15 +32,41 @@
     creates: /ofs/README
   sudo: true
 
-- name: Make sure objectivefs_symlinks paths exists
+- name: Make sure objectivefs_symlinks target exists
   file:
     path: "/ofs/{{ item.ofs_path }}"
     state: directory
   with_items: objectivefs_symlinks
 
+- name: Make sure objectivefs_symlinks target permissions are correct
+  file:
+    path: "/ofs/{{ item.ofs_path }}"
+    group: "{{ item.group }}"
+    owner: "{{ item.owner }}"
+    recurse: true
+    state: directory
+  with_items: objectivefs_symlinks
+  run_once: true
+
+
+# #If a folder exists at this path, move it and then create the symlink
+- stat: path={{ item.server_path }}
+  register: destination_symlink_existing
+  with_items: objectivefs_symlinks
+
+# - debug: var=item
+#   with_items: destination_symlink_existing.results
+
+- name: Move {{ item.item.server_path }} to {{ item.item.server_path }}-bak
+  command: mv {{ item.item.server_path }} {{ item.item.server_path }}-bak
+  when: item.stat.isdir and item.stat.islnk == False
+  with_items: destination_symlink_existing.results
+
 - name: Symlink the content into the application where it's needed
   file:
     src="/ofs/{{ item.ofs_path }}"
     dest="{{ item.server_path }}"
+    group="{{ item.group }}"
+    owner="{{ item.owner }}"
     state=link
   with_items: objectivefs_symlinks
