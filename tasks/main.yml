@@ -12,8 +12,9 @@
   file:
     path: /etc/objectivefs.env
     state: directory
+  become: true
 
-- copy: content="{{ item.content }}" dest=/etc/objectivefs.env/{{ item.filename }}
+- copy: content="{{ item.content }}" dest=/etc/objectivefs.env/{{ item.filename }} owner=root group=root mode=440 backup=yes
   with_items:
     - { content: '{{ aws_access_key_id }}', filename: 'AWS_ACCESS_KEY_ID' }
     - { content: '{{ aws_secret_access_key }}', filename: 'AWS_SECRET_ACCESS_KEY' }
@@ -24,15 +25,11 @@
   file:
     path: "{{ objectivefs_mountpoint }}"
     state: directory
+  become: true
 
-- name: Add to fstab
+- name: Add to fstab and mount
   - mount: "name={{ objectivefs_mountpoint }} src={{ objectivefs_filesystem }} fstype=objectivefs opts=auto,_netdev state=mounted"
-
-- name: Mount drive
-  command: "mount.objectivefs {{ objectivefs_filesystem }} {{ objectivefs_mountpoint }}"
-  args:
-    creates: "{{ objectivefs_mountpoint }}/README"
-  sudo: true
+    become: true
 
 - include: symlinks.yml
   when: objectivefs_create_symlinks

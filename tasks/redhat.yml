@@ -7,4 +7,4 @@
 - name: Install objectivefs
   yum: name="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_rpm }}"
     state=present
-  sudo: true
+  sudo: become

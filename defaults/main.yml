@@ -9,4 +9,4 @@ objectivefs_mountpoint: "/ofs"
 
 objectivefs_create_symlinks: true
 objectivefs_symlinks:
-  - { ofs_path: "test", server_path: "/home/{{ ansible_ssh_user }}/test", group: ubuntu, owner: ubuntu }
+  - { ofs_path: "test", server_path: "/home/{{ ansible_ssh_user }}/test", group: "{{ ansible_ssh_user }}", owner: "{{ ansible_ssh_user }}" }

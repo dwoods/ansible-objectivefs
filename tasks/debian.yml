@@ -7,4 +7,4 @@
 - name: Install objectivefs
   apt: deb="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_deb }}"
     state=present
-  sudo: true
+  become: true
