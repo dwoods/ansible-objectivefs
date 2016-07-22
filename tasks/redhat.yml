@@ -1,0 +1,10 @@
+---
+
+- name: Download objectivefs
+  get_url: url="{{ objectivefs_rpm }}"
+    dest="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_rpm }}"
+
+- name: Install objectivefs
+  yum: name="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_rpm }}"
+    state=present
+  sudo: true
