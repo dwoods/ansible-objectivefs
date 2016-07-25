@@ -15,10 +15,11 @@
   become: true
 
 - copy: content="{{ item.content }}" dest=/etc/objectivefs.env/{{ item.filename }} owner=root group=root mode=440 backup=yes
+  when: objectivefs_mount
   with_items:
     - { content: '{{ aws_access_key_id }}', filename: 'AWS_ACCESS_KEY_ID' }
     - { content: '{{ aws_secret_access_key }}', filename: 'AWS_SECRET_ACCESS_KEY' }
-    - { content: '{{ objectivefs_licence }}', filename: 'OBJECTIVEFS_LICENSE' }
+    - { content: '{{ objectivefs_license }}', filename: 'OBJECTIVEFS_LICENSE' }
     - { content: '{{ objectivefs_passphrase }}', filename: 'OBJECTIVEFS_PASSPHRASE' }
 
 - name: Make sure mount point exists
@@ -26,10 +27,12 @@
     path: "{{ objectivefs_mountpoint }}"
     state: directory
   become: true
+  when: objectivefs_mount
 
 - name: Add to fstab and mount
   - mount: "name={{ objectivefs_mountpoint }} src={{ objectivefs_filesystem }} fstype=objectivefs opts=auto,_netdev state=mounted"
     become: true
+  when: objectivefs_mount
 
 - include: symlinks.yml
   when: objectivefs_create_symlinks

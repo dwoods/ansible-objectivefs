@@ -5,8 +5,10 @@ objectivefs_packagename_rpm: "objectivefs-{{ objectivefs_version }}-1.x86_64.rpm
 objectivefs_deb: "https://objectivefs.com/user/download/abse4rv5w/{{ objectivefs_packagename_deb }}"
 objectivefs_rpm: "https://objectivefs.com/user/download/abse4rv5w/{{ objectivefs_packagename_rpm }}"
 
+objectivefs_filesystem: "test"
 objectivefs_mountpoint: "/ofs"
+objectivefs_mount: false
 
-objectivefs_create_symlinks: true
+objectivefs_create_symlinks: false
 objectivefs_symlinks:
   - { ofs_path: "test", server_path: "/home/{{ ansible_ssh_user }}/test", group: "{{ ansible_ssh_user }}", owner: "{{ ansible_ssh_user }}" }
