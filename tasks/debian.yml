@@ -1,0 +1,10 @@
+---
+
+- name: Download objectivefs
+  get_url: url="{{ objectivefs_deb }}"
+    dest="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_deb }}"
+
+- name: Install objectivefs
+  apt: deb="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_deb }}"
+    state=present
+  become: true

@@ -1,7 +1,14 @@
 ---
-objectivefs_version: 4.1.1
-objectivefs_packagename: "objectivefs_{{ objectivefs_version }}_amd64.deb"
-objectivefs_deb: "https://objectivefs.com/user/download/agvubvg5r/{{ objectivefs_packagename }}"
+objectivefs_version: 4.3.1
+objectivefs_packagename_deb: "objectivefs_{{ objectivefs_version }}_amd64.deb"
+objectivefs_packagename_rpm: "objectivefs-{{ objectivefs_version }}-1.x86_64.rpm"
+objectivefs_deb: "https://objectivefs.com/user/download/abse4rv5w/{{ objectivefs_packagename_deb }}"
+objectivefs_rpm: "https://objectivefs.com/user/download/abse4rv5w/{{ objectivefs_packagename_rpm }}"
 
+objectivefs_filesystem: "test"
+objectivefs_mountpoint: "/ofs"
+objectivefs_mount: false
+
+objectivefs_create_symlinks: false
 objectivefs_symlinks:
-  - { ofs_path: "test", server_path: "/home/{{ ansible_ssh_user }}/test", group: ubuntu, owner: ubuntu }
+  - { ofs_path: "test", server_path: "/home/{{ ansible_ssh_user }}/test", group: "{{ ansible_ssh_user }}", owner: "{{ ansible_ssh_user }}" }

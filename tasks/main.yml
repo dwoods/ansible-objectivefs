@@ -1,72 +1,38 @@
 ---
 
-- name: Download objectivefs
-  get_url: url="{{ objectivefs_deb }}"
-    dest="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename }}"
+- include: debian.yml
+  when: ansible_os_family == 'Debian'
+  tags: package
 
-- name: Install objectivefs
-  apt: deb="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename }}"
-    state=present
-  sudo: true
+- include: redhat.yml
+  when: ansible_os_family == 'RedHat'
+  tags: package
 
 - name: Make sure objectivefs config dir exists
   file:
     path: /etc/objectivefs.env
     state: directory
+  become: true
 
-- copy: content="{{ item.content }}" dest=/etc/objectivefs.env/{{ item.filename }}
+- copy: content="{{ item.content }}" dest=/etc/objectivefs.env/{{ item.filename }} owner=root group=root mode=440 backup=yes
+  when: objectivefs_mount
   with_items:
     - { content: '{{ aws_access_key_id }}', filename: 'AWS_ACCESS_KEY_ID' }
     - { content: '{{ aws_secret_access_key }}', filename: 'AWS_SECRET_ACCESS_KEY' }
-    - { content: '{{ objectivefs_licence }}', filename: 'OBJECTIVEFS_LICENSE' }
+    - { content: '{{ objectivefs_license }}', filename: 'OBJECTIVEFS_LICENSE' }
     - { content: '{{ objectivefs_passphrase }}', filename: 'OBJECTIVEFS_PASSPHRASE' }
 
 - name: Make sure mount point exists
   file:
-    path: /ofs
+    path: "{{ objectivefs_mountpoint }}"
     state: directory
+  become: true
+  when: objectivefs_mount
 
-- name: Mount drive
-  command: "mount.objectivefs {{ objectivefs_filesystem }} /ofs"
-  args:
-    creates: /ofs/README
-  sudo: true
+- name: Add to fstab and mount
+  - mount: "name={{ objectivefs_mountpoint }} src={{ objectivefs_filesystem }} fstype=objectivefs opts=auto,_netdev state=mounted"
+    become: true
+  when: objectivefs_mount
 
-- name: Make sure objectivefs_symlinks target exists
-  file:
-    path: "/ofs/{{ item.ofs_path }}"
-    state: directory
-  with_items: objectivefs_symlinks
-
-- name: Make sure objectivefs_symlinks target permissions are correct
-  file:
-    path: "/ofs/{{ item.ofs_path }}"
-    group: "{{ item.group }}"
-    owner: "{{ item.owner }}"
-    recurse: true
-    state: directory
-  with_items: objectivefs_symlinks
-  run_once: true
-
-
-# #If a folder exists at this path, move it and then create the symlink
-- stat: path={{ item.server_path }}
-  register: destination_symlink_existing
-  with_items: objectivefs_symlinks
-
-# - debug: var=item
-#   with_items: destination_symlink_existing.results
-
-- name: Move {{ item.item.server_path }} to {{ item.item.server_path }}-bak
-  command: mv {{ item.item.server_path }} {{ item.item.server_path }}-bak
-  when: item.stat.isdir and item.stat.islnk == False
-  with_items: destination_symlink_existing.results
-
-- name: Symlink the content into the application where it's needed
-  file:
-    src="/ofs/{{ item.ofs_path }}"
-    dest="{{ item.server_path }}"
-    group="{{ item.group }}"
-    owner="{{ item.owner }}"
-    state=link
-  with_items: objectivefs_symlinks
+- include: symlinks.yml
+  when: objectivefs_create_symlinks
