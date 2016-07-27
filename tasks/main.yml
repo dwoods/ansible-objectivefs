@@ -30,8 +30,13 @@
   when: objectivefs_mount
 
 - name: Add to fstab and mount
-  - mount: "name={{ objectivefs_mountpoint }} src={{ objectivefs_filesystem }} fstype=objectivefs opts=auto,_netdev state=mounted"
-    become: true
+  mount:
+    name: "{{ objectivefs_mountpoint }}"
+    src: "{{ objectivefs_filesystem }}"
+    fstype: objectivefs
+    opts: auto,_netdev
+    state: mounted
+  become: true
   when: objectivefs_mount
 
 - include: symlinks.yml
