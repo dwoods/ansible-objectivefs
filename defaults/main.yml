@@ -4,6 +4,7 @@ objectivefs_packagename_deb: "objectivefs_{{ objectivefs_version }}_amd64.deb"
 objectivefs_packagename_rpm: "objectivefs-{{ objectivefs_version }}-1.x86_64.rpm"
 objectivefs_deb: "https://objectivefs.com/user/download/abse4rv5w/{{ objectivefs_packagename_deb }}"
 objectivefs_rpm: "https://objectivefs.com/user/download/abse4rv5w/{{ objectivefs_packagename_rpm }}"
+objectivefs_download: true
 
 objectivefs_filesystem: "test"
 objectivefs_mountpoint: "/ofs"
