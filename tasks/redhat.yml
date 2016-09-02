@@ -1,8 +1,17 @@
 ---
 
-- name: Download objectivefs
+- name: Download objectivefs from url
   get_url: url="{{ objectivefs_rpm }}"
     dest="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_rpm }}"
+  when: not aws
+
+- name: Download objectivefs from s3
+  s3:
+    bucket: "{{ objectivefs_aws_bucket }}"
+    object: "{{ objectivefs_packagename_rpm }}"
+    mode: get
+    dest: "/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_rpm }}"
+  when: aws
 
 - name: Install objectivefs
   yum: name="/home/{{ ansible_ssh_user }}/{{ objectivefs_packagename_rpm }}"
